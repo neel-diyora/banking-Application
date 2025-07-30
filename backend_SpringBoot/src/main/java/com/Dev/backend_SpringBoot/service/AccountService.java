@@ -24,6 +24,10 @@ public class AccountService {
         return accountRepository.findByAccountNumber(accountNumber);
     }
 
+    public Optional<BigDecimal> getBalance(String accountNumber) {
+        return accountRepository.findByAccountNumber(accountNumber).map(Account::getBalance);
+    }
+
     @Transactional
     public void transferMoney(String fromAccountNumber, String toAccountNumber, BigDecimal amount) {
         Account fromAccount = accountRepository.findByAccountNumber(fromAccountNumber)
