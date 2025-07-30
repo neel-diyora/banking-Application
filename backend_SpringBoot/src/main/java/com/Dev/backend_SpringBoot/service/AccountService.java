@@ -29,6 +29,33 @@ public class AccountService {
     }
 
     @Transactional
+    public Account depositMoney(String accountNumber, BigDecimal amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found")); // Or a custom AccountNotFoundException
+
+        BigDecimal newBalance = account.getBalance().add(amount);
+        account.setBalance(newBalance);
+
+        return accountRepository.save(account);
+    }
+
+    @Transactional
+    public Account withdrawMoney(String accountNumber, BigDecimal amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        // Check for sufficient funds
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("Insufficient funds for this withdrawal");
+        }
+
+        BigDecimal newBalance = account.getBalance().subtract(amount);
+        account.setBalance(newBalance);
+
+        return accountRepository.save(account);
+    }
+
+    @Transactional
     public void transferMoney(String fromAccountNumber, String toAccountNumber, BigDecimal amount) {
         Account fromAccount = accountRepository.findByAccountNumber(fromAccountNumber)
                 .orElseThrow(() -> new RuntimeException("Sender account not found"));

@@ -1,7 +1,9 @@
 package com.Dev.backend_SpringBoot.controller;
 
 import com.Dev.backend_SpringBoot.dto.CreateAccountRequest;
+import com.Dev.backend_SpringBoot.dto.DepositRequest;
 import com.Dev.backend_SpringBoot.dto.TransferRequest;
+import com.Dev.backend_SpringBoot.dto.WithdrawRequest;
 import com.Dev.backend_SpringBoot.entity.Account;
 import com.Dev.backend_SpringBoot.service.AccountService;
 import jakarta.validation.Valid;
@@ -26,6 +28,32 @@ public class AccountController {
         account.setAccountHolderName(createAccountRequest.getAccountHolderName());
         Account createdAccount = accountService.createAccount(account);
         return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/accounts/{accountNumber}/deposit")
+    public ResponseEntity<Account> deposit(
+            @PathVariable String accountNumber,
+            @Valid @RequestBody DepositRequest depositRequest) {
+        try {
+            Account updatedAccount = accountService.depositMoney(accountNumber, depositRequest.getAmount());
+            return ResponseEntity.ok(updatedAccount);
+        } catch (RuntimeException e) {
+            // In a real app, you'd have more specific exception handling
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/accounts/{accountNumber}/withdraw")
+    public ResponseEntity<?> withdraw(
+            @PathVariable String accountNumber,
+            @Valid @RequestBody WithdrawRequest withdrawRequest) {
+        try {
+            Account updatedAccount = accountService.withdrawMoney(accountNumber, withdrawRequest.getAmount());
+            return ResponseEntity.ok(updatedAccount);
+        } catch (RuntimeException e) {
+            // Return a more descriptive error message to the client
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/accounts/{accountNumber}/balance")
