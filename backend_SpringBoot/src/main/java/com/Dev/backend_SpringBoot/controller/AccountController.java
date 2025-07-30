@@ -23,11 +23,18 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping("/accounts")
-    public ResponseEntity<Account> createAccount(@Valid @RequestBody CreateAccountRequest createAccountRequest) {
-        Account account = new Account();
-        account.setAccountHolderName(createAccountRequest.getAccountHolderName());
-        Account createdAccount = accountService.createAccount(account);
-        return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
+    public ResponseEntity<?> createAccount(@Valid @RequestBody CreateAccountRequest createAccountRequest) {
+        try {
+            Account account = new Account();
+            account.setAccountHolderName(createAccountRequest.getAccountHolderName());
+            // Set the initial balance from the request
+            account.setBalance(createAccountRequest.getBalance());
+
+            Account createdAccount = accountService.createAccount(account);
+            return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error creating account: " + e.getMessage());
+        }
     }
 
     @PostMapping("/accounts/{accountNumber}/deposit")
